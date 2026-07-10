@@ -1,13 +1,14 @@
-import axios from 'axios'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 
 function App() {
-  const { data, isPending, isError } = useQuery({
-    queryKey: ['health'],
-    queryFn: () => axios.get('/api/health').then((res) => res.data.status),
-  })
+  const [message, setMessage] = useState('Loading...')
 
-  const message = isPending ? 'Loading...' : isError ? 'Error reaching server' : data
+  useEffect(() => {
+    fetch('/api/health')
+      .then((res) => res.json())
+      .then((data) => setMessage(data.status))
+      .catch(() => setMessage('Error reaching server'))
+  }, [])
 
   return (
     <div>
