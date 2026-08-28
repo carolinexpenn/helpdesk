@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma.ts";
+import { Role } from "../constants/role.ts";
 
 export const auth = betterAuth({
   basePath: "/api/auth",
@@ -9,5 +10,16 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    disableSignUp: true,
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: [Role.admin, Role.agent],
+        required: false,
+        defaultValue: Role.agent,
+        input: false,
+      },
+    },
   },
 });
