@@ -1,20 +1,19 @@
-import { useEffect, useState } from 'react'
+import { Route, Routes } from 'react-router'
+import ProtectedRoute from '@/components/ProtectedRoute'
+import Layout from '@/components/Layout'
+import LoginPage from '@/pages/LoginPage'
+import HomePage from '@/pages/HomePage'
 
 function App() {
-  const [message, setMessage] = useState('Loading...')
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((res) => res.json())
-      .then((data) => setMessage(data.status))
-      .catch(() => setMessage('Error reaching server'))
-  }, [])
-
   return (
-    <div>
-      <h1>Helpdesk</h1>
-      <p>API health: {message}</p>
-    </div>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route path="/" element={<HomePage />} />
+        </Route>
+      </Route>
+    </Routes>
   )
 }
 
