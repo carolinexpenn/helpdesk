@@ -5,7 +5,7 @@ function ProtectedRoute() {
   const { data, isPending } = useSession();
 
   if (isPending) {
-    return <p>Loading...</p>;
+    return <div className="loading">Loading ... </div>;
   }
 
   if (!data?.user) {

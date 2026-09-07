@@ -5,6 +5,7 @@ import { Role } from "../constants/role.ts";
 
 export const auth = betterAuth({
   basePath: "/api/auth",
+  trustedOrigins: [process.env.CLIENT_URL ?? "http://localhost:5173"],
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
