@@ -77,15 +77,20 @@ The client proxies `/api/*` requests to the server via Vite config (target is co
 
 ## Authentication
 
-- **Library**: Better Auth with Prisma adapter
-- **Server config**: `server/src/lib/auth.ts` — mounted at `/api/auth/{*any}` (must be before `express.json()`)
-- **Client config**: `client/src/lib/auth-client.ts` — exports `signIn`, `signOut`, `useSession`
-- **Middleware**: `server/src/middleware/require-auth.ts` — `requireAuth` guard that sets `req.user` and `req.session`
-- **Route protection (client)**: `ProtectedRoute` component wraps authenticated routes; redirects to `/login` if unauthenticated
-- **Admin route protection (client)**: `AdminRoute` component wraps admin-only routes; redirects non-admins to `/`
-- **Sign-up is disabled** — users are seeded via `prisma/seed.ts`
-- **User roles**: `admin` and `agent` (defined as Prisma enum, default `agent`)
-- **Rate limiting**: Auth routes are rate-limited, but only enforced when `NODE_ENV=production`
+- **Library**: Better Auth with Prisma adapter, email/password only (`emailAndPassword.enabled: true`, `disableSignUp: true`)
+- **Server config**: `server/src/lib/auth.ts` — mounted at `/api/auth/{*any}` via `toNodeHandler(auth)` (must be before `express.json()`, since Better Auth parses its own request bodies)
+  - `basePath: "/api/auth"`
+  - `trustedOrigins`: `[CLIENT_URL]` (defaults to `http://localhost:5173`) — update this if the client runs on a different port
+  - Sessions are database-backed (rows in Prisma's `Session` table), tied to an httpOnly cookie set by Better Auth — no manual token/header handling needed
+- **Required env vars** (`server/.env`): `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `CLIENT_URL`, plus `ADMIN_EMAIL`/`ADMIN_PASSWORD` for the seed script
+- **Client config**: `client/src/lib/auth-client.ts` — exports `signIn`, `signOut`, `useSession` (from `createAuthClient()`, no `baseURL` override — relies on the Vite `/api` proxy)
+- **Middleware**: `server/src/middleware/require-auth.ts` — `requireAuth` guard calls `auth.api.getSession()`, returns 401 if there's no session, otherwise sets `req.user`/`req.session` and calls `next()`
+- **Typing `req.user`/`req.session`**: augmented in `server/src/types/express.d.ts` via `typeof auth.$Infer.Session.user`/`.session` — update that file, not a plain `Express.Request` interface elsewhere, if the session shape changes
+- **Route protection (client)**: `ProtectedRoute` component (`client/src/components/ProtectedRoute.tsx`) wraps authenticated routes; shows a loading state while `useSession()` is pending, redirects to `/login` if unauthenticated
+- **Admin route protection (client)**: `AdminRoute` component wraps admin-only routes; redirects non-admins to `/` — **not yet implemented**, add it alongside `ProtectedRoute` following the same pattern (check `useSession().data?.user.role === Role.admin`)
+- **Sign-up is disabled** — users are seeded via `prisma/seed.ts`, which reads `ADMIN_EMAIL`/`ADMIN_PASSWORD` and skips creation if that email already exists
+- **User roles**: `admin` and `agent` (defined as a Prisma `Role` enum). Exposed on the Better Auth user as an `additionalFields.role` entry — `defaultValue: Role.agent`, `input: false` (can't be set via the client API, only via the database/seed)
+- **Rate limiting**: documented intent for auth routes, enforced only when `NODE_ENV=production` — **not yet implemented**; when adding it, use Better Auth's built-in rate limit config (see the `better-auth-security-best-practices` skill) rather than a separate Express middleware
 
 ## Testing
 
