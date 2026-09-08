@@ -1,5 +1,6 @@
 import { Outlet, useNavigate } from "react-router";
 import { signOut, useSession } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
 
 function Layout() {
   const { data } = useSession();
@@ -12,13 +13,13 @@ function Layout() {
 
   return (
     <div>
-      <nav className="flex justify-between items-center p-4 bg-black text-white">
+      <nav className="flex items-center justify-between border-b border-border bg-white p-4 text-black">
         <span className="font-bold">Helpdesk</span>
-        <span>
+        <span className="flex items-center gap-4 text-sm font-medium">
           {data?.user.name}
-          <button onClick={handleSignOut} className="ml-4 cursor-pointer hover:underline">
+          <Button variant="outline" size="sm" onClick={handleSignOut}>
             Sign out
-          </button>
+          </Button>
         </span>
       </nav>
       <Outlet />

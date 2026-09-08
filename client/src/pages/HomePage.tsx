@@ -1,5 +1,10 @@
 function HomePage() {
-  return <h1 className="p-4 font-bold">Home</h1>;
+  return (
+    <div className="p-6">
+      <h1 className="text-4xl font-bold">Dashboard</h1>
+      <p className="mt-1 text-muted-foreground">Welcome to the Helpdesk Dashboard</p>
+    </div>
+  );
 }
 
 export default HomePage;
