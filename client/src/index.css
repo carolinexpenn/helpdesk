@@ -15,3 +15,12 @@ body {
   line-height: 1.5;
 }
 
+.input-error {
+  border-color: #dc3545 !important;
+}
+
+.input-error:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+

@@ -1,23 +1,30 @@
 import { useState } from "react";
-import type { FormEvent } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useNavigate } from "react-router";
 import { signIn } from "@/lib/auth-client";
 
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function onSubmit(values: LoginFormValues) {
     setError(null);
-    setIsSubmitting(true);
 
-    const { error } = await signIn.email({ email, password });
-
-    setIsSubmitting(false);
+    const { error } = await signIn.email(values);
 
     if (error) {
       setError(error.message ?? "Failed to sign in");
@@ -42,7 +49,7 @@ function LoginPage() {
         <h1 style={{ fontWeight: "bold", margin: 0 }}>Helpdesk</h1>
         <p style={{ marginTop: "0.25rem", color: "#555" }}>Sign into your account</p>
       </div>
-      <form onSubmit={handleSubmit} style={{ marginTop: "1.5rem" }}>
+      <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: "1.5rem" }}>
         {error && <p style={{ color: "red", marginTop: 0 }}>{error}</p>}
         <div>
           <label htmlFor="email" style={{ display: "block", marginBottom: "0.25rem" }}>
@@ -51,11 +58,11 @@ function LoginPage() {
           <input
             id="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            {...register("email")}
+            className={errors.email ? "input-error" : undefined}
             style={{ width: "100%", padding: "0.375rem 0.75rem", border: "1px solid #ced4da", borderRadius: "0.375rem" }}
           />
+          {errors.email && <p style={{ color: "red", margin: "0.25rem 0 0" }}>{errors.email.message}</p>}
         </div>
         <div style={{ marginTop: "0.75rem" }}>
           <label htmlFor="password" style={{ display: "block", marginBottom: "0.25rem" }}>
@@ -64,11 +71,11 @@ function LoginPage() {
           <input
             id="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            {...register("password")}
+            className={errors.password ? "input-error" : undefined}
             style={{ width: "100%", padding: "0.375rem 0.75rem", border: "1px solid #ced4da", borderRadius: "0.375rem" }}
           />
+          {errors.password && <p style={{ color: "red", margin: "0.25rem 0 0" }}>{errors.password.message}</p>}
         </div>
         <button
           type="submit"
