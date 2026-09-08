@@ -6,7 +6,7 @@ import { useNavigate } from "react-router";
 import { signIn } from "@/lib/auth-client";
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+  email: z.string().min(1, "Email is required").check(z.email("Enter a valid email")),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -34,62 +34,37 @@ function LoginPage() {
     navigate("/", { replace: true });
   }
 
+  const inputClass = (hasError?: boolean) =>
+    `w-full px-3 py-1.5 border rounded-md ${
+      hasError ? "border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/25" : "border-gray-300"
+    }`;
+
   return (
-    <div
-      style={{
-        maxWidth: "320px",
-        margin: "4rem auto",
-        padding: "1.5rem",
-        border: "1px solid #dee2e6",
-        borderRadius: "0.5rem",
-        boxShadow: "0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)",
-      }}
-    >
-      <div style={{ textAlign: "center" }}>
-        <h1 style={{ fontWeight: "bold", margin: 0 }}>Helpdesk</h1>
-        <p style={{ marginTop: "0.25rem", color: "#555" }}>Sign into your account</p>
+    <div className="max-w-xs mx-auto mt-16 p-6 border border-gray-200 rounded-lg shadow-sm">
+      <div className="text-center">
+        <h1 className="font-bold">Helpdesk</h1>
+        <p className="mt-1 text-gray-600">Sign into your account</p>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: "1.5rem" }}>
-        {error && <p style={{ color: "red", marginTop: 0 }}>{error}</p>}
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6">
+        {error && <p className="text-red-600">{error}</p>}
         <div>
-          <label htmlFor="email" style={{ display: "block", marginBottom: "0.25rem" }}>
+          <label htmlFor="email" className="block mb-1">
             Email
           </label>
-          <input
-            id="email"
-            type="email"
-            {...register("email")}
-            className={errors.email ? "input-error" : undefined}
-            style={{ width: "100%", padding: "0.375rem 0.75rem", border: "1px solid #ced4da", borderRadius: "0.375rem" }}
-          />
-          {errors.email && <p style={{ color: "red", margin: "0.25rem 0 0" }}>{errors.email.message}</p>}
+          <input id="email" type="email" {...register("email")} className={inputClass(!!errors.email)} />
+          {errors.email && <p className="text-red-600 mt-1">{errors.email.message}</p>}
         </div>
-        <div style={{ marginTop: "0.75rem" }}>
-          <label htmlFor="password" style={{ display: "block", marginBottom: "0.25rem" }}>
+        <div className="mt-3">
+          <label htmlFor="password" className="block mb-1">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            {...register("password")}
-            className={errors.password ? "input-error" : undefined}
-            style={{ width: "100%", padding: "0.375rem 0.75rem", border: "1px solid #ced4da", borderRadius: "0.375rem" }}
-          />
-          {errors.password && <p style={{ color: "red", margin: "0.25rem 0 0" }}>{errors.password.message}</p>}
+          <input id="password" type="password" {...register("password")} className={inputClass(!!errors.password)} />
+          {errors.password && <p className="text-red-600 mt-1">{errors.password.message}</p>}
         </div>
         <button
           type="submit"
           disabled={isSubmitting}
-          style={{
-            marginTop: "1rem",
-            width: "100%",
-            padding: "0.5rem",
-            backgroundColor: "#0d6efd",
-            color: "#fff",
-            border: "none",
-            borderRadius: "0.375rem",
-            cursor: isSubmitting ? "default" : "pointer",
-          }}
+          className={`mt-4 w-full py-2 rounded-md text-white bg-blue-600 ${isSubmitting ? "cursor-default" : "cursor-pointer"}`}
         >
           {isSubmitting ? "Logging in..." : "Log in"}
         </button>

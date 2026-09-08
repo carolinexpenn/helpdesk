@@ -12,11 +12,11 @@ function Layout() {
 
   return (
     <div>
-      <nav style={{ display: "flex", justifyContent: "space-between", padding: "1rem", borderBottom: "1px solid #ccc" }}>
-        <span>Helpdesk</span>
+      <nav className="flex justify-between items-center p-4 bg-black text-white">
+        <span className="font-bold">Helpdesk</span>
         <span>
           {data?.user.name}
-          <button onClick={handleSignOut} style={{ marginLeft: "1rem" }}>
+          <button onClick={handleSignOut} className="ml-4 cursor-pointer hover:underline">
             Sign out
           </button>
         </span>
