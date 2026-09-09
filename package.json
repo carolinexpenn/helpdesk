@@ -1,0 +1,14 @@
+{
+  "name": "helpdesk",
+  "private": true,
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "dotenv": "^17.4.2"
+  }
+}
