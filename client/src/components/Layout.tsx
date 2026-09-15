@@ -16,7 +16,9 @@ function Layout() {
     <div>
       <nav className="flex items-center justify-between border-b border-border bg-white p-4 text-black">
         <span className="flex items-center gap-4">
-          <span className="font-bold">Helpdesk</span>
+          <Link to="/" className="font-bold">
+            Helpdesk
+          </Link>
           {data?.user.role === Role.admin && (
             <Link to="/users" className="text-sm font-medium">
               Users

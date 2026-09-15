@@ -13,6 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import ErrorAlert from "@/components/ErrorAlert";
 import UserFormDialog, { type EditableUser } from "@/components/UserFormDialog";
 
@@ -111,44 +113,74 @@ function UsersPage() {
         <ErrorAlert error={deleteMutation.error} fallback="Failed to delete user" />
       )}
 
-      {isPending ? (
-        <p className="mt-4 text-muted-foreground">Loading...</p>
-      ) : (
-        <Table className="mt-4">
-          <TableHeader>
-            <TableRow>
-              <SortableHead field="name">Name</SortableHead>
-              <SortableHead field="email">Email</SortableHead>
-              <SortableHead field="role">Role</SortableHead>
-              <SortableHead field="createdAt">Created</SortableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedUsers?.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell className="capitalize">{user.role}</TableCell>
-                <TableCell>{new Date(user.createdAt).toLocaleDateString("en-GB")}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => openEditDialog(user)}>
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive"
-                    onClick={() => handleDelete(user)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+      <Table className="mt-4">
+        <TableHeader>
+          <TableRow>
+            <SortableHead field="name">Name</SortableHead>
+            <SortableHead field="email">Email</SortableHead>
+            <SortableHead field="role">Role</SortableHead>
+            <SortableHead field="createdAt">Created</SortableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isPending
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-48" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-20" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="ml-auto h-4 w-24" />
+                  </TableCell>
+                </TableRow>
+              ))
+            : sortedUsers?.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={user.role === Role.admin ? "default" : "secondary"}
+                      className={cn(
+                        "border-transparent text-sm capitalize",
+                        user.role === Role.admin
+                          ? "bg-foreground text-background"
+                          : "bg-foreground/10 text-foreground",
+                      )}
+                    >
+                      {user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="oldstyle-nums">
+                    {new Date(user.createdAt).toLocaleDateString("en-GB")}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(user)}>
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      onClick={() => handleDelete(user)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+        </TableBody>
+      </Table>
 
       <UserFormDialog open={dialogOpen} onOpenChange={setDialogOpen} user={editingUser} />
     </div>
