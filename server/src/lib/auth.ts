@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma.ts";
-import { Role } from "../constants/role.ts";
+import { Role } from "core/constants/role.ts";
 
 export const auth = betterAuth({
   basePath: "/api/auth",

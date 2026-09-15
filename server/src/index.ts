@@ -3,6 +3,7 @@ import { toNodeHandler } from "better-auth/node";
 import { prisma } from "./lib/prisma.ts";
 import { auth } from "./lib/auth.ts";
 import { requireAuth } from "./middleware/require-auth.ts";
+import usersRouter from "./routes/users.ts";
 
 const app = express();
 const port = process.env.PORT ?? 3000;
@@ -22,6 +23,8 @@ app.get("/api/health", (_req, res) => {
 app.get("/api/me", requireAuth, (req, res) => {
   res.json({ user: req.user, session: req.session });
 });
+
+app.use("/api/users", usersRouter);
 
 async function boot() {
   await prisma.$connect();

@@ -1,5 +1,5 @@
 import { auth } from "../src/lib/auth.ts";
-import { Role } from "../src/constants/role.ts";
+import { Role } from "core/constants/role.ts";
 
 async function seedAdmin() {
   const ctx = await auth.$context;
@@ -16,12 +16,15 @@ async function seedAdmin() {
     return;
   }
 
-  const user = await ctx.internalAdapter.createUser({
-    email,
-    name: "Admin",
-    emailVerified: true,
-    role: Role.admin,
-  });
+  const user = await ctx.internalAdapter.createUser(
+    {
+      email,
+      name: "Admin",
+      emailVerified: true,
+      role: Role.admin,
+    },
+    { method: "admin" },
+  );
 
   const hashedPassword = await ctx.password.hash(password);
   await ctx.internalAdapter.linkAccount({

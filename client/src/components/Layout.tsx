@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate } from "react-router";
 import { signOut, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { Role } from "@/constants/role";
+import { Role } from "core/constants/role.ts";
 
 function Layout() {
   const { data } = useSession();

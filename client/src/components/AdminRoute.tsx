@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router";
 import { useSession } from "@/lib/auth-client";
-import { Role } from "@/constants/role";
+import { Role } from "core/constants/role.ts";
 
 function AdminRoute() {
   const { data, isPending } = useSession();
