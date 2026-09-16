@@ -36,12 +36,11 @@ router.post("/", async (req, res) => {
       email: data.email,
       name: data.name,
       emailVerified: false,
-      role: data.role,
     },
     { method: "admin" },
   );
 
-  const hashedPassword = await ctx.password.hash(process.env.DEFAULT_USER_PASSWORD!);
+  const hashedPassword = await ctx.password.hash(data.password);
   await ctx.internalAdapter.linkAccount({
     userId: user.id,
     providerId: "credential",
@@ -66,7 +65,7 @@ router.put("/:id", async (req, res) => {
 
   const user = await prisma.user.update({
     where: { id },
-    data: { name: data.name, email: data.email, role: data.role },
+    data: { name: data.name, email: data.email },
   });
 
   res.json(user);

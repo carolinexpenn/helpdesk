@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createUserSchema, type CreateUserInput } from "core/schemas/users";
-import { Role } from "core/constants/role.ts";
+import type { AxiosResponse } from "axios";
+import { createUserSchema, updateUserSchema, type CreateUserInput } from "core/schemas/users";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,13 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import ErrorAlert from "@/components/ErrorAlert";
 import ErrorMessage from "@/components/ErrorMessage";
 
@@ -29,7 +22,6 @@ export interface EditableUser {
   id: string;
   name: string;
   email: string;
-  role: Role;
 }
 
 interface UserFormDialogProps {
@@ -43,25 +35,31 @@ function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps) {
   const queryClient = useQueryClient();
 
   const {
-    control,
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<CreateUserInput>({
-    resolver: zodResolver(createUserSchema),
-    defaultValues: { name: "", email: "", role: Role.agent },
+    resolver: zodResolver(
+      isEditing ? updateUserSchema : createUserSchema,
+    ) as unknown as Resolver<CreateUserInput>,
+    defaultValues: { name: "", email: "", password: "" },
   });
 
   useEffect(() => {
     if (open) {
-      reset(user ? { name: user.name, email: user.email, role: user.role } : { name: "", email: "", role: Role.agent });
+      reset({ name: user?.name ?? "", email: user?.email ?? "", password: "" });
     }
   }, [open, user, reset]);
 
   const mutation = useMutation({
-    mutationFn: (data: CreateUserInput) =>
-      isEditing ? api.put(`/users/${user.id}`, data) : api.post("/users", data),
+    mutationFn: (data: CreateUserInput): Promise<AxiosResponse> => {
+      if (isEditing) {
+        const { password: _password, ...rest } = data;
+        return api.put(`/users/${user.id}`, rest);
+      }
+      return api.post("/users", data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       onOpenChange(false);
@@ -91,30 +89,30 @@ function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps) {
             <Label htmlFor="email" className="mb-1">
               Email
             </Label>
-            <Input id="email" type="email" aria-invalid={!!errors.email} {...register("email")} />
+            <Input
+              id="email"
+              type="email"
+              autoComplete="off"
+              aria-invalid={!!errors.email}
+              {...register("email")}
+            />
             {errors.email && <ErrorMessage message={errors.email.message} />}
           </div>
-          <div className="mt-3">
-            <Label htmlFor="role" className="mb-1">
-              Role
-            </Label>
-            <Controller
-              control={control}
-              name="role"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="role" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={Role.admin}>Admin</SelectItem>
-                    <SelectItem value={Role.agent}>Agent</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.role && <ErrorMessage message={errors.role.message} />}
-          </div>
+          {!isEditing && (
+            <div className="mt-3">
+              <Label htmlFor="password" className="mb-1">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                aria-invalid={!!errors.password}
+                {...register("password")}
+              />
+              {errors.password && <ErrorMessage message={errors.password.message} />}
+            </div>
+          )}
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save"}
