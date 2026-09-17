@@ -3,9 +3,7 @@ interface ErrorMessageProps {
 }
 
 function ErrorMessage({ message }: ErrorMessageProps) {
-  if (!message) return null;
-
-  return <p className="mt-1 text-sm text-destructive">{message}</p>;
+  return <p className="mt-1 min-h-5 text-sm text-destructive">{message}</p>;
 }
 
 export default ErrorMessage;
