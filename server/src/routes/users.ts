@@ -68,6 +68,12 @@ router.put("/:id", async (req, res) => {
     data: { name: data.name, email: data.email },
   });
 
+  if (data.password) {
+    const ctx = await auth.$context;
+    const hashedPassword = await ctx.password.hash(data.password);
+    await ctx.internalAdapter.updatePassword(id, hashedPassword);
+  }
+
   res.json(user);
 });
 
@@ -85,7 +91,7 @@ router.delete("/:id", async (req, res) => {
     return;
   }
 
-  await prisma.user.update({ where: { id }, data: { isDeleted: true } });
+  await prisma.user.update({ where: { id }, data: { isDeleted: true, deletedAt: new Date() } });
 
   res.status(204).end();
 });

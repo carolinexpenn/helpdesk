@@ -6,7 +6,11 @@ export const createUserSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export const updateUserSchema = createUserSchema.omit({ password: true });
+export const updateUserSchema = createUserSchema.omit({ password: true }).extend({
+  password: z
+    .union([z.literal(""), z.string().min(8, "Password must be at least 8 characters")])
+    .optional(),
+});
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;

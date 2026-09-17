@@ -55,8 +55,8 @@ function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps) {
   const mutation = useMutation({
     mutationFn: (data: CreateUserInput): Promise<AxiosResponse> => {
       if (isEditing) {
-        const { password: _password, ...rest } = data;
-        return api.put(`/users/${user.id}`, rest);
+        const { password, ...rest } = data;
+        return api.put(`/users/${user.id}`, password ? { ...rest, password } : rest);
       }
       return api.post("/users", data);
     },
@@ -98,21 +98,20 @@ function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps) {
             />
             {errors.email && <ErrorMessage message={errors.email.message} />}
           </div>
-          {!isEditing && (
-            <div className="mt-3">
-              <Label htmlFor="password" className="mb-1">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                aria-invalid={!!errors.password}
-                {...register("password")}
-              />
-              {errors.password && <ErrorMessage message={errors.password.message} />}
-            </div>
-          )}
+          <div className="mt-3">
+            <Label htmlFor="password" className="mb-1">
+              {isEditing ? "New password" : "Password"}
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              placeholder={isEditing ? "Leave blank to keep the current password" : undefined}
+              aria-invalid={!!errors.password}
+              {...register("password")}
+            />
+            {errors.password && <ErrorMessage message={errors.password.message} />}
+          </div>
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save"}

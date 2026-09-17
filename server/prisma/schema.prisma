@@ -25,6 +25,7 @@ model User {
   image         String?
   role          Role      @default(agent)
   isDeleted     Boolean   @default(false)
+  deletedAt     DateTime?
   createdAt     DateTime
   updatedAt     DateTime
   sessions      Session[]

@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsUpDown, Pencil, Trash2 } from "lucide-react";
 import { Role } from "core/constants/role.ts";
+import { useSession } from "@/lib/auth-client";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ type SortField = "name" | "email" | "role" | "createdAt";
 type SortDirection = "asc" | "desc";
 
 function UsersPage() {
+  const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<EditableUser | undefined>(undefined);
@@ -165,16 +167,23 @@ function UsersPage() {
                     {new Date(user.createdAt).toLocaleDateString("en-GB")}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(user)}>
-                      Edit
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Edit"
+                      onClick={() => openEditDialog(user)}
+                    >
+                      <Pencil />
                     </Button>
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      aria-label="Delete"
                       className="text-destructive"
+                      disabled={user.id === session?.user.id}
                       onClick={() => handleDelete(user)}
                     >
-                      Delete
+                      <Trash2 />
                     </Button>
                   </TableCell>
                 </TableRow>
