@@ -19,6 +19,9 @@ function Layout() {
           <Link to="/" className="font-bold">
             Helpdesk
           </Link>
+          <Link to="/tickets" className="text-sm font-medium">
+            Tickets
+          </Link>
           {data?.user.role === Role.admin && (
             <Link to="/users" className="text-sm font-medium">
               Users

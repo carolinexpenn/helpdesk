@@ -17,21 +17,73 @@ enum Role {
   agent
 }
 
+enum TicketStatus {
+  new
+  processing
+  open
+  resolved
+  closed
+}
+
+enum TicketCategory {
+  general_question
+  technical_question
+  refund_request
+}
+
+enum SenderType {
+  agent
+  customer
+}
+
 model User {
-  id            String    @id
-  name          String
-  email         String    @unique
-  emailVerified Boolean
-  image         String?
-  role          Role      @default(agent)
-  isDeleted     Boolean   @default(false)
-  deletedAt     DateTime?
-  createdAt     DateTime
-  updatedAt     DateTime
-  sessions      Session[]
-  accounts      Account[]
+  id              String    @id
+  name            String
+  email           String    @unique
+  emailVerified   Boolean
+  image           String?
+  role            Role      @default(agent)
+  isDeleted       Boolean   @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime
+  updatedAt       DateTime
+  sessions        Session[]
+  accounts        Account[]
+  assignedTickets Ticket[]
+  replies         Reply[]
 
   @@map("user")
+}
+
+model Ticket {
+  id           Int             @id @default(autoincrement())
+  subject      String
+  body         String
+  bodyHtml     String?
+  status       TicketStatus    @default(new)
+  category     TicketCategory?
+  senderName   String
+  senderEmail  String
+  assignedToId String?
+  assignedTo   User?           @relation(fields: [assignedToId], references: [id])
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  replies      Reply[]
+
+  @@map("ticket")
+}
+
+model Reply {
+  id         Int        @id @default(autoincrement())
+  body       String
+  senderType SenderType
+  ticketId   Int
+  ticket     Ticket     @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id])
+  createdAt  DateTime   @default(now())
+
+  @@map("reply")
 }
 
 model Session {

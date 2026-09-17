@@ -8,8 +8,10 @@ import { validate } from "../lib/validate.ts";
 
 const router = Router();
 
-router.use(requireAuth, requireAdmin);
+router.use(requireAuth);
 
+// Any signed-in user can list agents (e.g. to populate a ticket "assign to" dropdown).
+// Creating, editing and deleting users remains admin-only.
 router.get("/", async (_req, res) => {
   const users = await prisma.user.findMany({
     where: { isDeleted: false },
@@ -18,6 +20,8 @@ router.get("/", async (_req, res) => {
 
   res.json(users);
 });
+
+router.use(requireAdmin);
 
 router.post("/", async (req, res) => {
   const data = validate(createUserSchema, req.body, res);

@@ -4,6 +4,9 @@ import { prisma } from "./lib/prisma.ts";
 import { auth } from "./lib/auth.ts";
 import { requireAuth } from "./middleware/require-auth.ts";
 import usersRouter from "./routes/users.ts";
+import webhooksRouter from "./routes/webhooks.ts";
+import ticketsRouter from "./routes/tickets.ts";
+import repliesRouter from "./routes/replies.ts";
 
 const app = express();
 const port = process.env.PORT ?? 3000;
@@ -25,6 +28,9 @@ app.get("/api/me", requireAuth, (req, res) => {
 });
 
 app.use("/api/users", usersRouter);
+app.use("/api/webhooks", webhooksRouter);
+app.use("/api/tickets", ticketsRouter);
+app.use("/api/tickets/:ticketId/replies", repliesRouter);
 
 async function boot() {
   await prisma.$connect();

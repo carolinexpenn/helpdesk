@@ -75,6 +75,35 @@ The client proxies `/api/*` requests to the server via Vite config (target is co
 - `new` and `processing` tickets are system-managed and never shown in the agent UI — agents only see `open`, `resolved`, and `closed` tickets
 - The `/api/tickets` endpoint excludes `new` and `processing` tickets by default (no `status` filter param)
 
+## List Pages
+
+Two reference implementations exist — follow whichever fits the data being listed:
+
+- **Small, fully-loaded, manually-managed lists** (e.g. `client/src/pages/UsersPage.tsx`): fetch all rows in one query, sort client-side with `useMemo`, no pagination, no server-side filtering.
+- **Larger or externally-populated lists** (e.g. `client/src/pages/TicketsPage.tsx`): sort/filter/search/paginate server-side via query params (`sortBy`/`sortOrder`, enum filters, debounced `search`, `page`/`pageSize`), validated with a shared Zod query schema (see `ticketListQuerySchema` in `core/schemas/tickets.ts`). Default to this pattern for any new list unless the dataset is small and bounded like `User`.
+
+Regardless of which, keep list pages visually and structurally consistent:
+- `Table`/`TableHeader`/`TableBody`/`TableRow`/`TableCell` from `@/components/ui/table`
+- A `SortableHead` helper component per page (column header button cycling asc/desc, with `ChevronUp`/`ChevronDown`/`ChevronsUpDown` from `lucide-react` and the shared `cn()` active-state styling) — copy the implementation from either reference page
+- `Skeleton` rows matching the real row/column shape while loading, not a spinner
+- `Badge` for enum-like columns (status, role, category), variant driven by a `Record<EnumType, BadgeVariant>` map
+- `ErrorAlert` for query/mutation errors
+- An explicit empty state row (e.g. "No tickets found.") when the list loads with zero results
+- Dates formatted with `new Date(x).toLocaleDateString("en-GB")` and `className="oldstyle-nums"`
+
+## Editable Lists (Create/Edit Forms)
+
+For entities created/edited directly by an agent/admin (not externally ingested, like tickets), follow the `UserFormDialog` pattern (`client/src/components/UserFormDialog.tsx`, triggered from `UsersPage.tsx`'s "Add" button and per-row pencil icon):
+- A single `<Entity>FormDialog` component handles both create and edit, switched by an optional `<entity>` prop
+- `Dialog`/`DialogContent`/`DialogHeader`/`DialogFooter` from `@/components/ui/dialog`
+- React Hook Form + `zodResolver`, resolving against the shared create schema (or update schema when editing) from `core/schemas/`
+- Reset form fields in a `useEffect` keyed on `open`/the entity prop
+- `ErrorAlert` for mutation errors, `ErrorMessage` per-field
+- Submit button shows a "Saving..." label while `isSubmitting`
+- The list page owns dialog open/close state and which entity is being edited; row actions are icon buttons (`Pencil` to edit, `Trash2` to delete) in a right-aligned "Actions" column
+
+Entities that are ingested externally (like `Ticket`, created via the inbound-email webhook) don't get a create dialog — editable fields are instead updated inline on a detail page via auto-saving `Select` dropdowns that call `PATCH` on change (see `client/src/pages/TicketDetailPage.tsx`).
+
 ## Authentication
 
 - **Library**: Better Auth with Prisma adapter, email/password only (`emailAndPassword.enabled: true`, `disableSignUp: true`)
