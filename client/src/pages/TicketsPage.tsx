@@ -8,6 +8,7 @@ import type { TicketListItem } from "core/constants/ticket.ts";
 import type { TicketSortField } from "core/schemas/tickets.ts";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { formatLabel, statusBadgeClassName } from "@/lib/ticket-display";
 import {
   Table,
   TableBody,
@@ -37,18 +38,6 @@ interface TicketListResponse {
 }
 
 const pageSize = 10;
-
-const statusBadgeVariant: Record<TicketStatus, "default" | "secondary" | "outline"> = {
-  new: "outline",
-  processing: "outline",
-  open: "default",
-  resolved: "secondary",
-  closed: "outline",
-};
-
-function formatLabel(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, " ");
-}
 
 function TicketsPage() {
   const navigate = useNavigate();
@@ -198,7 +187,7 @@ function TicketsPage() {
             <SortableHead field="senderName">Sender</SortableHead>
             <SortableHead field="status">Status</SortableHead>
             <SortableHead field="category">Category</SortableHead>
-            <TableHead>Assigned to</TableHead>
+            <SortableHead field="assignedTo">Assigned to</SortableHead>
             <SortableHead field="createdAt">Created</SortableHead>
           </TableRow>
         </TableHeader>
@@ -238,7 +227,10 @@ function TicketsPage() {
                     <div className="text-xs text-muted-foreground">{ticket.senderEmail}</div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusBadgeVariant[ticket.status]} className="capitalize">
+                    <Badge
+                      variant="outline"
+                      className={cn("capitalize", statusBadgeClassName[ticket.status])}
+                    >
                       {ticket.status}
                     </Badge>
                   </TableCell>

@@ -34,10 +34,15 @@ router.get("/", async (req, res) => {
     ];
   }
 
+  const orderBy: Prisma.TicketOrderByWithRelationInput =
+    query.sortBy === "assignedTo"
+      ? { assignedTo: { name: query.sortOrder } }
+      : { [query.sortBy]: query.sortOrder };
+
   const [tickets, total] = await Promise.all([
     prisma.ticket.findMany({
       where,
-      orderBy: { [query.sortBy]: query.sortOrder },
+      orderBy,
       skip: (query.page - 1) * query.pageSize,
       take: query.pageSize,
       include: { assignedTo: { select: { id: true, name: true } } },

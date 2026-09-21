@@ -9,11 +9,13 @@ import { createReplySchema, type CreateReplyInput } from "core/schemas/replies.t
 import type { Ticket, TicketAgent } from "core/constants/ticket.ts";
 import type { Reply } from "core/constants/reply.ts";
 import { api } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import { formatLabel, statusBadgeClassName } from "@/lib/ticket-display";
+import TicketDetailSkeleton from "@/components/TicketDetailSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -26,10 +28,6 @@ import ErrorAlert from "@/components/ErrorAlert";
 import ErrorMessage from "@/components/ErrorMessage";
 
 const UNASSIGNED = "unassigned";
-
-function formatLabel(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, " ");
-}
 
 function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -85,12 +83,7 @@ function TicketDetailPage() {
   }
 
   if (isPending) {
-    return (
-      <div className="p-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="mt-4 h-32 w-full" />
-      </div>
-    );
+    return <TicketDetailSkeleton />;
   }
 
   if (error || !ticket) {
@@ -115,7 +108,12 @@ function TicketDetailPage() {
             {new Date(ticket.createdAt).toLocaleString("en-GB")}
           </p>
         </div>
-        <Badge className="capitalize">{ticket.status}</Badge>
+        <Badge
+          variant="outline"
+          className={cn("capitalize", statusBadgeClassName[ticket.status])}
+        >
+          {ticket.status}
+        </Badge>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">

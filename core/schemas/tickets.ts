@@ -12,7 +12,14 @@ export const inboundEmailSchema = z.object({
 
 export type InboundEmailInput = z.infer<typeof inboundEmailSchema>;
 
-const sortableTicketColumns = ["subject", "senderName", "status", "category", "createdAt"] as const;
+const sortableTicketColumns = [
+  "subject",
+  "senderName",
+  "status",
+  "category",
+  "assignedTo",
+  "createdAt",
+] as const;
 
 export type TicketSortField = (typeof sortableTicketColumns)[number];
 
